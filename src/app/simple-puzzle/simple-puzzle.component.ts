@@ -1,5 +1,14 @@
 import { Component, OnInit, HostListener, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 
+interface LeaderboardRecord {
+  bestMoves: number | null;
+  bestTime: number | null;
+}
+
+interface LeaderboardData {
+  [boardSize: number]: LeaderboardRecord;
+}
+
 @Component({
   selector: 'app-simple-puzzle',
   templateUrl: './simple-puzzle.component.html',
@@ -16,9 +25,10 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
   timerId: any = null;
   hasStarted = false;
   statusMessage = ''
-  private wasSolved = false;
-
+  private wasSolved = false;  leaderboard: LeaderboardData = {};
+  isNewRecord = { moves: false, time: false };
   ngOnInit(): void {
+    this.loadLeaderboard();
     this.reset();
   }
 
@@ -128,6 +138,7 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
     this.moveCount++;
     if (this.isSolved()) {
       this.stopTimer();
+      this.checkAndUpdateRecords();
     }
   }
 
@@ -176,6 +187,58 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
 
   isPaused(): boolean {
     return this.hasStarted && !this.isRunning && this.startTime !== null && !this.isSolved();
+  }
+
+  loadLeaderboard(): void {
+    const saved = localStorage.getItem('puzzle-leaderboard');
+    if (saved) {
+      try {
+        this.leaderboard = JSON.parse(saved);
+      } catch {
+        this.leaderboard = {};
+      }
+    } else {
+      this.leaderboard = {};
+    }
+  }
+
+  saveLeaderboard(): void {
+    localStorage.setItem('puzzle-leaderboard', JSON.stringify(this.leaderboard));
+  }
+
+  checkAndUpdateRecords(): void {
+    if (!this.leaderboard[this.size]) {
+      this.leaderboard[this.size] = { bestMoves: null, bestTime: null };
+    }
+
+    const record = this.leaderboard[this.size];
+    this.isNewRecord = { moves: false, time: false };
+
+    // Check moves record
+    if (record.bestMoves === null || this.moveCount < record.bestMoves) {
+      record.bestMoves = this.moveCount;
+      this.isNewRecord.moves = true;
+    }
+
+    // Check time record
+    if (record.bestTime === null || this.elapsedMs < record.bestTime) {
+      record.bestTime = this.elapsedMs;
+      this.isNewRecord.time = true;
+    }
+
+    this.saveLeaderboard();
+  }
+
+  getCurrentRecord(): LeaderboardRecord | null {
+    return this.leaderboard[this.size] || null;
+  }
+
+  clearLeaderboard(): void {
+    if (confirm('Are you sure you want to clear all leaderboard records?')) {
+      this.leaderboard = {};
+      this.saveLeaderboard();
+      this.statusMessage = 'Leaderboard cleared';
+    }
   }
 
   handleArrowKeyMovement(arrowKey: string): void {

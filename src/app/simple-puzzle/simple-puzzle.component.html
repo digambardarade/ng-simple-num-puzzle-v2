@@ -23,6 +23,10 @@
       <div class="sp-overlay-card" role="dialog" aria-modal="true" aria-label="Puzzle solved">
         <h3>🎉 Puzzle Solved!</h3>
         <p>Solved in {{ moveCount }} moves, {{ formatTime(elapsedMs) }}.</p>
+        <div *ngIf="isNewRecord.moves || isNewRecord.time" class="new-record-banner">
+          <span *ngIf="isNewRecord.moves">🥇 New Best Moves!</span>
+          <span *ngIf="isNewRecord.time">⚡ New Best Time!</span>
+        </div>
         <button #playAgainBtn (click)="reset()" autofocus title="Play Again (P or Space)">Play Again</button>
       </div>
     </div>
@@ -77,6 +81,46 @@
         <option [value]="5">Board - 5×5</option>
       </select>
     </div>
-    
+
+    <div class="sp-leaderboard">
+      <div class="sp-leaderboard-card card shadow-sm bg-transparent border-0">
+        <div class="card-body">
+          <h4 class="card-title text-center mb-3">🏆 Best Records - {{ size }}×{{ size }}</h4>
+          <div class="records" *ngIf="getCurrentRecord(); else noRecords">
+            <div class="record-item d-flex justify-content-between align-items-center mb-3 p-2 bg-transparent border rounded">
+              <div class="d-flex align-items-center" *ngIf="getCurrentRecord()?.bestMoves !== null">
+                <span class="record-label fw-bold text-secondary me-2">Moves:</span>
+                <span class="record-value d-flex align-items-center" [class.text-success]="isSolved() && isNewRecord.moves" [class.fw-bold]="isSolved() && isNewRecord.moves">
+                  {{ getCurrentRecord()?.bestMoves }}
+                  <span *ngIf="isSolved() && isNewRecord.moves" class="badge bg-success ms-2 animate__animated animate__pulse">NEW!</span>
+                </span>
+              </div>
+              <div class="d-flex align-items-center" *ngIf="getCurrentRecord()?.bestTime !== null">
+                <span class="record-label fw-bold text-secondary me-2">Time:</span>
+                <span class="record-value d-flex align-items-center" [class.text-success]="isSolved() && isNewRecord.time" [class.fw-bold]="isSolved() && isNewRecord.time">
+                  {{ formatTime(getCurrentRecord()?.bestTime || 0) }}
+                  <span *ngIf="isSolved() && isNewRecord.time" class="badge bg-success ms-2 animate__animated animate__pulse">NEW!</span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <ng-template #noRecords>
+            <div class="text-center py-3">
+              <p class="no-records text-muted mb-0">
+                <i class="fas fa-trophy text-warning me-2"></i>
+                Complete a puzzle to set your first record!
+              </p>
+            </div>
+          </ng-template>
+          <div class="text-center mt-3">
+            <button class="btn btn-outline-danger btn-sm" (click)="clearLeaderboard()" title="Clear all records">
+              <i class="fas fa-trash-alt me-1"></i>Clear Records
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
   </div>
 </div>
