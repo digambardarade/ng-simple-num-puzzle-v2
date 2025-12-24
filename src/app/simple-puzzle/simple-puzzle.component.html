@@ -2,7 +2,18 @@
   <!-- <h2>Simple Sliding Puzzle</h2> -->
 
   <div class="row mt-4 align-items-center">
-    <div class="col-md-6 d-flex justify-content-center">
+   
+    <div class="col-md-6 ">
+       <div class="sp-stats mb-1">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="px-3 py-1 bg-transparent border rounded-pill shadow fw-semibold me-2 d-inline-flex align-items-center">
+              Moves: <strong class="ms-1">{{ moveCount }}</strong>
+            </span>
+            <span class="px-3 py-1 bg-transparent border rounded-pill shadow fw-semibold d-inline-flex align-items-center">
+              Time: <strong class="mono ms-1">{{ formatTime(elapsedMs) }}</strong>
+            </span>
+          </div>
+        </div>
       <div
         class="sp-board"
         [class.solved]="isSolved()"
@@ -234,16 +245,7 @@
             </div>
           </div>
         </div>
-        <div class="sp-stats ">
-          <div class="d-flex justify-content-between align-items-center gap-3">
-            <span class=" px-1 py-1 bg-transparent border shadow-sm">
-              Moves: <strong>{{ moveCount }}</strong>
-            </span>
-            <span class="px- py-1 bg-transparent border shadow-sm">
-              Time: <strong class="mono">{{ formatTime(elapsedMs) }}</strong>
-            </span>
-          </div>
-        </div>
+        
 
          <div class="sp-size">
           <select
