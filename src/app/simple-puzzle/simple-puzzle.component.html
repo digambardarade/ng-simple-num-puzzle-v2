@@ -72,6 +72,40 @@
 
     <div class="col-md-6">
       <div class="sp-side">
+        <div class="sp-actions">
+          <!-- Reset: only before game starts (full width when alone) -->
+          <button *ngIf="!hasStarted" (click)="reset()">Shuffle / Reset</button>
+
+          <!-- End: visible only after game starts -->
+          <button
+            *ngIf="hasStarted"
+            (click)="end()"
+            [disabled]="isSolved()"
+            title="End (E)"
+          >
+            End
+          </button>
+
+          <!-- Pause: visible when running -->
+          <button
+            *ngIf="hasStarted && isRunning"
+            (click)="pause()"
+            [disabled]="isSolved()"
+            title="Pause (Space)"
+          >
+            Pause
+          </button>
+
+          <!-- Resume: visible when paused -->
+          <button
+            *ngIf="hasStarted && isPaused()"
+            (click)="resume()"
+            [disabled]="isSolved()"
+            title="Resume (Space)"
+          >
+            Resume
+          </button>
+        </div>
         <div class="sr-only" aria-live="polite">{{ statusMessage }}</div>
 
         <!-- Player Section -->
@@ -211,42 +245,7 @@
           </div>
         </div>
 
-        <div class="sp-actions">
-          <!-- Reset: only before game starts (full width when alone) -->
-          <button *ngIf="!hasStarted" (click)="reset()">Shuffle / Reset</button>
-
-          <!-- End: visible only after game starts -->
-          <button
-            *ngIf="hasStarted"
-            (click)="end()"
-            [disabled]="isSolved()"
-            title="End (E)"
-          >
-            End
-          </button>
-
-          <!-- Pause: visible when running -->
-          <button
-            *ngIf="hasStarted && isRunning"
-            (click)="pause()"
-            [disabled]="isSolved()"
-            title="Pause (Space)"
-          >
-            Pause
-          </button>
-
-          <!-- Resume: visible when paused -->
-          <button
-            *ngIf="hasStarted && isPaused()"
-            (click)="resume()"
-            [disabled]="isSolved()"
-            title="Resume (Space)"
-          >
-            Resume
-          </button>
-        </div>
-
-        <div class="sp-size">
+         <div class="sp-size">
           <select
             aria-label="Board size"
             [(ngModel)]="size"
