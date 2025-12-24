@@ -1,5 +1,7 @@
 import { Component, OnInit, HostListener, ViewChild, ElementRef, AfterViewChecked, NgZone } from '@angular/core';
 
+
+
 interface LeaderboardRecord {
   bestMoves: number | null;
   bestTime: number | null;
@@ -481,5 +483,45 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
     return `${minutes.toString().padStart(2, '0')}:` +
            `${seconds.toString().padStart(2, '0')}:` +
            `${millis.toString().padStart(3, '0')}`;
+  }
+
+  removeCurrentPlayer(): void {
+    if (this.allPlayerNames.length <= 1) {
+      this.statusMessage = 'Error: At least one player must exist.';
+      this.ngZone.runOutsideAngular(() => {
+        setTimeout(() => {
+          this.ngZone.run(() => {
+            this.statusMessage = '';
+          });
+        }, 2500);
+      });
+      return;
+    }
+    const idx = this.allPlayerNames.indexOf(this.playerName);
+    if (idx !== -1) {
+      this.allPlayerNames.splice(idx, 1);
+      localStorage.setItem('puzzle-all-players', JSON.stringify(this.allPlayerNames));
+      // Remove player records from leaderboard
+      Object.keys(this.leaderboard).forEach(size => {
+        const records = this.leaderboard[parseInt(size)];
+        if (records) {
+          this.leaderboard[parseInt(size)] = records.filter((r: any) => r.playerName !== this.playerName);
+        }
+      });
+      this.saveLeaderboard();
+      // Switch to another player
+      this.playerName = this.allPlayerNames[0];
+      localStorage.setItem('puzzle-player-name', this.playerName);
+      this.statusMessage = 'Player removed successfully.';
+      this.editingCurrentPlayer = false;
+      this.editingPlayerName = false;
+      this.ngZone.runOutsideAngular(() => {
+        setTimeout(() => {
+          this.ngZone.run(() => {
+            this.statusMessage = '';
+          });
+        }, 2500);
+      });
+    }
   }
 }
