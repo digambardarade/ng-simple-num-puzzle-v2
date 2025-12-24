@@ -1,11 +1,13 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 
 @Component({
   selector: 'app-simple-puzzle',
   templateUrl: './simple-puzzle.component.html',
   styleUrls: ['./simple-puzzle.component.scss']
 })
-export class SimplePuzzleComponent implements OnInit {
+export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
+  @ViewChild('playAgainBtn') playAgainBtn!: ElementRef<HTMLButtonElement>;
+  
   size = 3; // default board size
   tiles: number[] = [];
   moveCount = 0;
@@ -13,10 +15,21 @@ export class SimplePuzzleComponent implements OnInit {
   elapsedMs = 0;
   timerId: any = null;
   hasStarted = false;
-  statusMessage = '';
+  statusMessage = ''
+  private wasSolved = false;
 
   ngOnInit(): void {
     this.reset();
+  }
+
+  ngAfterViewChecked(): void {
+    // Focus play again button when puzzle becomes solved
+    if (this.isSolved() && !this.wasSolved && this.playAgainBtn) {
+      setTimeout(() => {
+        this.playAgainBtn.nativeElement.focus();
+      }, 100);
+    }
+    this.wasSolved = this.isSolved();
   }
 
   get dimensionStyle() {
@@ -43,6 +56,7 @@ export class SimplePuzzleComponent implements OnInit {
     this.elapsedMs = 0;
     this.startTime = null;
     this.hasStarted = false;
+    this.wasSolved = false;
   }
 
   setSize(n: number): void {
@@ -184,16 +198,68 @@ export class SimplePuzzleComponent implements OnInit {
     return this.isRunning ? 'Pause' : 'Resume';
   }
 
-  // Paused when a game has started, timer is not running, not solved
   isPaused(): boolean {
     return this.hasStarted && !this.isRunning && this.startTime !== null && !this.isSolved();
   }
 
+  handleArrowKeyMovement(arrowKey: string): void {
+    const emptyIdx = this.emptyIndex;
+    const emptyRow = Math.floor(emptyIdx / this.size);
+    const emptyCol = emptyIdx % this.size;
+    
+    let targetRow = emptyRow;
+    let targetCol = emptyCol;
+    
+    // Determine which tile should move into the empty space
+    switch (arrowKey) {
+      case 'ArrowUp':
+        // Move tile from below empty space up
+        targetRow = emptyRow + 1;
+        break;
+      case 'ArrowDown':
+        // Move tile from above empty space down  
+        targetRow = emptyRow - 1;
+        break;
+      case 'ArrowLeft':
+        // Move tile from right of empty space left
+        targetCol = emptyCol + 1;
+        break;
+      case 'ArrowRight':
+        // Move tile from left of empty space right
+        targetCol = emptyCol - 1;
+        break;
+    }
+    
+    // Check if target position is valid
+    if (targetRow >= 0 && targetRow < this.size && 
+        targetCol >= 0 && targetCol < this.size) {
+      const targetIdx = targetRow * this.size + targetCol;
+      this.move(targetIdx);
+    }
+  }
+
   @HostListener('window:keydown', ['$event'])
   handleKeydown(event: KeyboardEvent): void {
-    if (this.isSolved()) return;
     const key = event.key.toLowerCase();
     const isSpace = event.code === 'Space' || event.key === ' ';
+    
+    // Handle Play Again when solved
+    if (this.isSolved()) {
+      if (key === 'p' || isSpace) {
+        event.preventDefault();
+        this.reset();
+        this.statusMessage = 'New game started';
+      }
+      return;
+    }
+    
+    // Handle arrow keys for tile movement
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+      event.preventDefault();
+      this.handleArrowKeyMovement(event.key);
+      return;
+    }
+    
     if (isSpace) {
       if (this.hasStarted) {
         event.preventDefault();
@@ -201,6 +267,24 @@ export class SimplePuzzleComponent implements OnInit {
       }
       return;
     }
+    
+    if (key === 'r') {
+      // Resume if paused
+      if (this.isPaused()) {
+        event.preventDefault();
+        this.toggleStartPauseResume();
+      }
+      return;
+    }
+    
+    if (key === 's') {
+      // Shuffle/Reset
+      event.preventDefault();
+      this.reset();
+      this.statusMessage = 'New game shuffled';
+      return;
+    }
+    
     if (key === 'e') {
       if (this.hasStarted) {
         event.preventDefault();
