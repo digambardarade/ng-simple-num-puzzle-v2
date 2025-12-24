@@ -89,22 +89,22 @@
                   <span class="fw-bold text-primary" style="font-size: 1.3em;">👤</span>
                   <span class="fw-bold ml-2" style="font-size: 1.1em;">{{ playerName }}</span>
                 </div>
-                <div class="d-flex gap-2">
+                <div class="d-flex ">
                   <button
                     class="btn btn-outline-primary btn-sm "
                     (click)="editingCurrentPlayer = true; editingPlayerName = false; addingNewPlayer = false;"
                     title="Edit current player name"
-                    style="min-width: 80px; height: 2em;"
+                    style="min-width: 60px; height: 2em;"
                   >
-                    <i class="fas fa-pencil-alt"></i>&nbsp;Edit
+                    Edit
                   </button>
                   <button
-                    class="btn btn-outline-secondary btn-sm "
+                    class="btn btn-outline-success btn-sm ml-1"
                     (click)="editingPlayerName = true; editingCurrentPlayer = false; addingNewPlayer = false;"
                     title="Change player"
-                    style="min-width: 90px; height: 2em;"
+                    style="min-width: 60px; height: 2em;"
                   >
-                    <i class="fas fa-exchange-alt"></i>&nbsp;Change
+                    Change
                   </button>
                 </div>
               </div>
@@ -196,7 +196,7 @@
             <span class=" px-1 py-1 bg-transparent border shadow-sm">
               Moves: <strong>{{ moveCount }}</strong>
             </span>
-            <span class="px-1 py-1 bg-transparent border shadow-sm">
+            <span class="px- py-1 bg-transparent border shadow-sm">
               Time: <strong class="mono">{{ formatTime(elapsedMs) }}</strong>
             </span>
           </div>
