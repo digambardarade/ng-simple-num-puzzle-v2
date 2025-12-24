@@ -4,11 +4,13 @@ import { FormsModule } from '@angular/forms';
 
 import { AppComponent } from './app.component';
 import { SimplePuzzleComponent } from './simple-puzzle/simple-puzzle.component';
+import { LeaderboardTopTenPipe } from './simple-puzzle/leaderboard-top-ten.pipe';
 
 @NgModule({
   declarations: [
     AppComponent,
-    SimplePuzzleComponent
+    SimplePuzzleComponent,
+    LeaderboardTopTenPipe
   ],
   imports: [
     BrowserModule,

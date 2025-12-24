@@ -77,7 +77,7 @@
         <!-- Player Section -->
         <div class="sp-player mb-1">
           <div class="card bg-transparent border">
-            <div class="card-body py-2">
+            <div class="card-body ">
               <div *ngIf="statusMessage.startsWith('Error:')" class="alert alert-danger py-1 px-2 mb-2" role="alert" style="font-size:0.95em;">
                 {{ statusMessage }}
               </div>
@@ -91,7 +91,7 @@
                 </div>
                 <div class="d-flex gap-2">
                   <button
-                    class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center px-2"
+                    class="btn btn-outline-primary btn-sm "
                     (click)="editingCurrentPlayer = true; editingPlayerName = false; addingNewPlayer = false;"
                     title="Edit current player name"
                     style="min-width: 80px; height: 2em;"
@@ -99,7 +99,7 @@
                     <i class="fas fa-pencil-alt"></i>&nbsp;Edit
                   </button>
                   <button
-                    class="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center px-2"
+                    class="btn btn-outline-secondary btn-sm "
                     (click)="editingPlayerName = true; editingCurrentPlayer = false; addingNewPlayer = false;"
                     title="Change player"
                     style="min-width: 90px; height: 2em;"
@@ -307,19 +307,19 @@
                         </tr>
                       </thead>
                       <tbody>
-                        <tr *ngFor="let record of getAllRecords(); let i = index"
+                        <tr *ngFor="let record of getAllRecords() | leaderboardTopTen:playerName; let i = index"
                             [class.table-primary]="record.playerName === playerName"
                             [class.fw-bold]="record.playerName === playerName">
-                          <td class="text-center" style="border-right: 2px solid #d6c9ae;">{{ i + 1 }}</td>
+                          <td class="text-center" style="border-right: 2px solid #d6c9ae;">{{ record.rank }}</td>
                           <td style="text-align: center; border-right: 2px solid #d6c9ae;">
                             {{ record.playerName }}
-                            <span *ngIf="i === 0 && record.playerName !== playerName" class="badge bg-success ms-2">Best Overall</span>
+                            <span *ngIf="record.rank === 1 && record.playerName !== playerName" class="badge bg-success ms-2">Best Overall</span>
                           </td>
                           <td style="text-align: center; border-right: 2px solid #d6c9ae;">
-                            <span [ngClass]="{'text-success': i === 0}">{{ record.bestMoves !== null ? record.bestMoves : '-' }}</span>
+                            <span [ngClass]="{'text-success': record.rank === 1}">{{ record.bestMoves !== null ? record.bestMoves : '-' }}</span>
                           </td>
                           <td style="text-align: center;">
-                            <span [ngClass]="{'text-success': i === 0}">{{ record.bestTime !== null ? formatTime(record.bestTime) : '-' }}</span>
+                            <span [ngClass]="{'text-success': record.rank === 1}">{{ record.bestTime !== null ? formatTime(record.bestTime) : '-' }}</span>
                           </td>
                         </tr>
                       </tbody>
