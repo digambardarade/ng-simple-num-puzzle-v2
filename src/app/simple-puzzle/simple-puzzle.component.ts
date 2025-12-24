@@ -1,7 +1,5 @@
 import { Component, OnInit, HostListener, ViewChild, ElementRef, AfterViewChecked, NgZone } from '@angular/core';
 
-
-
 interface LeaderboardRecord {
   bestMoves: number | null;
   bestTime: number | null;
@@ -52,6 +50,7 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
   addingNewPlayer: boolean = false;
   editingCurrentPlayer: boolean = false;
   editingPlayerName: boolean = false;
+  leaderboardView: string = 'current';
   ngOnInit(): void {
     // Load last player name if available
     const storedName = localStorage.getItem('puzzle-player-name');
