@@ -14,22 +14,19 @@ h2 {
   color: #2a1e13;
 }
 
-.sp-stats {
-  grid-column: 1 / -1;
+.sp-board {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  color: #3b2a1b;
+  gap: 6px;
+  position: relative;
+  width: min(92vw, 520px);
+  height: min(92vw, 520px);
+  padding: 8px;
+  border-radius: 12px;
+  border: 2px solid #000;
+  background-color: #bbae93;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.14);
 }
 
-.sp-stats span {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #efefef;
-  padding: 8px 12px;
-  border: 1px solid #d6c9ae;
-}
 
 .mono { font-family: ui-monospace, Menlo, Consolas, monospace; }
 
