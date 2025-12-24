@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, OnInit, HostListener, ViewChild, ElementRef, AfterViewChecked, NgZone } from '@angular/core';
 
 interface LeaderboardRecord {
   bestMoves: number | null;
@@ -16,6 +16,7 @@ interface LeaderboardData {
   styleUrls: ['./simple-puzzle.component.scss']
 })
 export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
+  constructor(private ngZone: NgZone) {}
     startTimer(): void {
       this.startTime = Date.now();
       this.timerId = setInterval(() => {
@@ -290,6 +291,13 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
       }
       if (this.allPlayerNames.includes(trimmed)) {
         this.statusMessage = `Error: Player name '${trimmed}' already exists.`;
+        this.ngZone.runOutsideAngular(() => {
+          setTimeout(() => {
+            this.ngZone.run(() => {
+              this.statusMessage = '';
+            });
+          }, 2500);
+        });
         return;
       }
       this.playerName = trimmed;
@@ -318,6 +326,13 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
         // Duplicate name, do not allow (unless it's the current name, which is handled above)
         if (trimmed !== this.playerName) {
           this.statusMessage = `Error: Player name '${trimmed}' already exists.`;
+          this.ngZone.runOutsideAngular(() => {
+            setTimeout(() => {
+              this.ngZone.run(() => {
+                this.statusMessage = '';
+              });
+            }, 2500);
+          });
           return;
         }
       }
