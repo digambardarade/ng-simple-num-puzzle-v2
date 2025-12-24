@@ -85,9 +85,9 @@
                 {{ statusMessage }}
               </div>
               <div *ngIf="!editingPlayerName && !editingCurrentPlayer" class="d-flex align-items-center justify-content-between w-100">
-                <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center">
                   <span class="fw-bold text-primary" style="font-size: 1.3em;">👤</span>
-                  <span class="fw-bold" style="font-size: 1.1em;">{{ playerName }}</span>
+                  <span class="fw-bold ml-2" style="font-size: 1.1em;">{{ playerName }}</span>
                 </div>
                 <div class="d-flex gap-2">
                   <button
@@ -191,12 +191,12 @@
             </div>
           </div>
         </div>
-        <div class="sp-stats px-2">
+        <div class="sp-stats ">
           <div class="d-flex justify-content-between align-items-center gap-3">
-            <span class=" px-2 py-1 bg-transparent border shadow-sm">
+            <span class=" px-1 py-1 bg-transparent border shadow-sm">
               Moves: <strong>{{ moveCount }}</strong>
             </span>
-            <span class="px-2 py-1 bg-transparent border shadow-sm">
+            <span class="px-1 py-1 bg-transparent border shadow-sm">
               Time: <strong class="mono">{{ formatTime(elapsedMs) }}</strong>
             </span>
           </div>
