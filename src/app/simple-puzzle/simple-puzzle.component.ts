@@ -32,6 +32,11 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
   playerName: string = 'Player 1';
   editingPlayerName: boolean = false;
   ngOnInit(): void {
+    // Load last player name if available
+    const storedName = localStorage.getItem('puzzle-player-name');
+    if (storedName) {
+      this.playerName = storedName;
+    }
     this.loadLeaderboard();
     this.reset();
   }
@@ -194,20 +199,24 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
   }
 
   loadLeaderboard(): void {
-    const saved = localStorage.getItem('puzzle-leaderboard');
+    const saved = localStorage.getItem('puzzle-leaderboard-v2');
     if (saved) {
       try {
         this.leaderboard = JSON.parse(saved);
+        console.log('Leaderboard loaded:', this.leaderboard);
       } catch {
         this.leaderboard = {};
+        console.warn('Failed to parse leaderboard from localStorage.');
       }
     } else {
       this.leaderboard = {};
+      console.log('No leaderboard found in localStorage.');
     }
   }
 
   saveLeaderboard(): void {
     localStorage.setItem('puzzle-leaderboard-v2', JSON.stringify(this.leaderboard));
+    console.log('Leaderboard saved:', this.leaderboard);
   }
 
   checkAndUpdateRecords(): void {
@@ -260,7 +269,9 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
     const trimmed = name.trim();
     if (trimmed && trimmed !== this.playerName) {
       this.playerName = trimmed;
+      localStorage.setItem('puzzle-player-name', this.playerName);
       this.statusMessage = `Now playing as ${this.playerName}`;
+      this.saveLeaderboard();
     }
     this.editingPlayerName = false;
   }
