@@ -3,10 +3,11 @@ import { Component, OnInit, HostListener, ViewChild, ElementRef, AfterViewChecke
 interface LeaderboardRecord {
   bestMoves: number | null;
   bestTime: number | null;
+  playerName: string;
 }
 
 interface LeaderboardData {
-  [boardSize: number]: LeaderboardRecord;
+  [boardSize: number]: LeaderboardRecord[];
 }
 
 @Component({
@@ -24,9 +25,12 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
   elapsedMs = 0;
   timerId: any = null;
   hasStarted = false;
-  statusMessage = ''
-  private wasSolved = false;  leaderboard: LeaderboardData = {};
+  statusMessage = '';
+  private wasSolved = false;
+  leaderboard: LeaderboardData = {};
   isNewRecord = { moves: false, time: false };
+  playerName: string = 'Player 1';
+  editingPlayerName: boolean = false;
   ngOnInit(): void {
     this.loadLeaderboard();
     this.reset();
@@ -203,26 +207,33 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
   }
 
   saveLeaderboard(): void {
-    localStorage.setItem('puzzle-leaderboard', JSON.stringify(this.leaderboard));
+    localStorage.setItem('puzzle-leaderboard-v2', JSON.stringify(this.leaderboard));
   }
 
   checkAndUpdateRecords(): void {
     if (!this.leaderboard[this.size]) {
-      this.leaderboard[this.size] = { bestMoves: null, bestTime: null };
+      this.leaderboard[this.size] = [];
     }
 
-    const record = this.leaderboard[this.size];
+    const records = this.leaderboard[this.size];
+    let playerRecord = records.find(r => r.playerName === this.playerName);
+    
+    if (!playerRecord) {
+      playerRecord = { bestMoves: null, bestTime: null, playerName: this.playerName };
+      records.push(playerRecord);
+    }
+
     this.isNewRecord = { moves: false, time: false };
 
     // Check moves record
-    if (record.bestMoves === null || this.moveCount < record.bestMoves) {
-      record.bestMoves = this.moveCount;
+    if (playerRecord.bestMoves === null || this.moveCount < playerRecord.bestMoves) {
+      playerRecord.bestMoves = this.moveCount;
       this.isNewRecord.moves = true;
     }
 
     // Check time record
-    if (record.bestTime === null || this.elapsedMs < record.bestTime) {
-      record.bestTime = this.elapsedMs;
+    if (playerRecord.bestTime === null || this.elapsedMs < playerRecord.bestTime) {
+      playerRecord.bestTime = this.elapsedMs;
       this.isNewRecord.time = true;
     }
 
@@ -230,7 +241,28 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
   }
 
   getCurrentRecord(): LeaderboardRecord | null {
-    return this.leaderboard[this.size] || null;
+    const records = this.leaderboard[this.size];
+    return records?.find(r => r.playerName === this.playerName) || null;
+  }
+
+  getAllRecords(): LeaderboardRecord[] {
+    return this.leaderboard[this.size] || [];
+  }
+
+  hasAnyRecords(): boolean {
+    return Object.keys(this.leaderboard).some(size => {
+      const records = this.leaderboard[parseInt(size)];
+      return records && records.length > 0 && records.some(r => r.bestMoves !== null || r.bestTime !== null);
+    });
+  }
+
+  updatePlayerName(name: string): void {
+    const trimmed = name.trim();
+    if (trimmed && trimmed !== this.playerName) {
+      this.playerName = trimmed;
+      this.statusMessage = `Now playing as ${this.playerName}`;
+    }
+    this.editingPlayerName = false;
   }
 
   clearLeaderboard(): void {

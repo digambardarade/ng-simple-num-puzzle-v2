@@ -1,126 +1,304 @@
-<div class="sp-container">
+<div class="container-fluid">
   <!-- <h2>Simple Sliding Puzzle</h2> -->
 
-  <div
-    class="sp-board"
-    [class.solved]="isSolved()"
-    [ngStyle]="dimensionStyle"
-    aria-label="Simple sliding puzzle board"
-  >
-    <button
-      class="sp-tile"
-      *ngFor="let tile of tiles; let i = index"
-      [class.empty]="tile === 0"
-      [disabled]="tile === 0 || !canMove(i) || isSolved() || isPaused()"
-      (click)="move(i)"
-      [attr.aria-label]="tile === 0 ? 'Empty' : 'Tile ' + tile"
-    >
-      <span *ngIf="tile !== 0">{{ tile }}</span>
-    </button>
-
-    <!-- Solved overlay banner with backdrop inside the board -->
-    <div class="sp-overlay" *ngIf="isSolved()" aria-live="polite">
-      <div class="sp-overlay-card" role="dialog" aria-modal="true" aria-label="Puzzle solved">
-        <h3>🎉 Puzzle Solved!</h3>
-        <p>Solved in {{ moveCount }} moves, {{ formatTime(elapsedMs) }}.</p>
-        <div *ngIf="isNewRecord.moves || isNewRecord.time" class="new-record-banner">
-          <span *ngIf="isNewRecord.moves">🥇 New Best Moves!</span>
-          <span *ngIf="isNewRecord.time">⚡ New Best Time!</span>
-        </div>
-        <button #playAgainBtn (click)="reset()" autofocus title="Play Again (P or Space)">Play Again</button>
-      </div>
-    </div>
-
-    <div class="sp-overlay" *ngIf="isPaused()" aria-live="polite">
-      <div class="sp-overlay-card" role="dialog" aria-modal="true" aria-label="Game paused">
-        <h3>⏸️ Game Paused</h3>
-        <p>Resume to continue playing.</p>
-        <button class="breathing resume-btn" (click)="resume()" autofocus title="Resume (Space)">Resume</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="sp-side">
-    <div class="sr-only" aria-live="polite">{{ statusMessage }}</div>
-    <div class="sp-stats">
-      <div class="div">
-        <span
-          >Moves: <strong>{{ moveCount }}</strong></span
-        >
-      </div>
-      <div class="div">
-        <span
-          >Time: <strong class="mono">{{ formatTime(elapsedMs) }}</strong></span
-        >
-      </div>
-    </div>
-
-    <div class="sp-actions">
-      <!-- Reset: only before game starts (full width when alone) -->
-      <button *ngIf="!hasStarted" (click)="reset()">Shuffle / Reset</button>
-
-      <!-- End: visible only after game starts -->
-      <button *ngIf="hasStarted" (click)="end()" [disabled]="isSolved()" title="End (E)">End</button>
-
-      <!-- Pause: visible when running -->
-      <button *ngIf="hasStarted && isRunning" (click)="pause()" [disabled]="isSolved()" title="Pause (Space)">Pause</button>
-
-      <!-- Resume: visible when paused -->
-      <button *ngIf="hasStarted && isPaused()" (click)="resume()" [disabled]="isSolved()" title="Resume (Space)">Resume</button>
-    </div>
-
-    <div class="sp-size">
-      <select
-        aria-label="Board size"
-        [(ngModel)]="size"
-        (ngModelChange)="setSize($event)"
-        [disabled]="hasStarted"
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <div
+        class="sp-board"
+        [class.solved]="isSolved()"
+        [ngStyle]="dimensionStyle"
+        aria-label="Simple sliding puzzle board"
       >
-        <option [value]="3">Board - 3×3</option>
-        <option [value]="4">Board - 4×4</option>
-        <option [value]="5">Board - 5×5</option>
-      </select>
-    </div>
+        <button
+          class="sp-tile"
+          *ngFor="let tile of tiles; let i = index"
+          [class.empty]="tile === 0"
+          [disabled]="tile === 0 || !canMove(i) || isSolved() || isPaused()"
+          (click)="move(i)"
+          [attr.aria-label]="tile === 0 ? 'Empty' : 'Tile ' + tile"
+        >
+          <span *ngIf="tile !== 0">{{ tile }}</span>
+        </button>
 
-    <div class="sp-leaderboard">
-      <div class="sp-leaderboard-card card shadow-sm bg-transparent border-0">
-        <div class="card-body">
-          <h4 class="card-title text-center mb-3">🏆 Best Records - {{ size }}×{{ size }}</h4>
-          <div class="records" *ngIf="getCurrentRecord(); else noRecords">
-            <div class="record-item d-flex justify-content-between align-items-center mb-3 p-2 bg-transparent border rounded">
-              <div class="d-flex align-items-center" *ngIf="getCurrentRecord()?.bestMoves !== null">
-                <span class="record-label fw-bold text-secondary me-2">Moves:</span>
-                <span class="record-value d-flex align-items-center" [class.text-success]="isSolved() && isNewRecord.moves" [class.fw-bold]="isSolved() && isNewRecord.moves">
-                  {{ getCurrentRecord()?.bestMoves }}
-                  <span *ngIf="isSolved() && isNewRecord.moves" class="badge bg-success ms-2 animate__animated animate__pulse">NEW!</span>
-                </span>
-              </div>
-              <div class="d-flex align-items-center" *ngIf="getCurrentRecord()?.bestTime !== null">
-                <span class="record-label fw-bold text-secondary me-2">Time:</span>
-                <span class="record-value d-flex align-items-center" [class.text-success]="isSolved() && isNewRecord.time" [class.fw-bold]="isSolved() && isNewRecord.time">
-                  {{ formatTime(getCurrentRecord()?.bestTime || 0) }}
-                  <span *ngIf="isSolved() && isNewRecord.time" class="badge bg-success ms-2 animate__animated animate__pulse">NEW!</span>
-                </span>
-              </div>
+        <!-- Solved overlay banner with backdrop inside the board -->
+        <div class="sp-overlay" *ngIf="isSolved()" aria-live="polite">
+          <div
+            class="sp-overlay-card"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Puzzle solved"
+          >
+            <h3>🎉 Congratulations {{ playerName }}!</h3>
+            <p>Solved in {{ moveCount }} moves, {{ formatTime(elapsedMs) }}.</p>
+            <div
+              *ngIf="isNewRecord.moves || isNewRecord.time"
+              class="new-record-banner"
+            >
+              <span *ngIf="isNewRecord.moves">🥇 New Personal Best Moves!</span>
+              <span *ngIf="isNewRecord.time">⚡ New Personal Best Time!</span>
             </div>
+            <button
+              #playAgainBtn
+              (click)="reset()"
+              autofocus
+              title="Play Again (P or Space)"
+            >
+              Play Again
+            </button>
           </div>
-          <ng-template #noRecords>
-            <div class="text-center py-3">
-              <p class="no-records text-muted mb-0">
-                <i class="fas fa-trophy text-warning me-2"></i>
-                Complete a puzzle to set your first record!
-              </p>
-            </div>
-          </ng-template>
-          <div class="text-center mt-3">
-            <button class="btn btn-outline-danger btn-sm" (click)="clearLeaderboard()" title="Clear all records">
-              <i class="fas fa-trash-alt me-1"></i>Clear Records
+        </div>
+
+        <div class="sp-overlay" *ngIf="isPaused()" aria-live="polite">
+          <div
+            class="sp-overlay-card"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Game paused"
+          >
+            <h3>⏸️ Game Paused</h3>
+            <p>Resume to continue playing.</p>
+            <button
+              class="breathing resume-btn"
+              (click)="resume()"
+              autofocus
+              title="Resume (Space)"
+            >
+              Resume
             </button>
           </div>
         </div>
       </div>
     </div>
 
+    <div class="col-md-6">
+      <div class="sp-side">
+        <div class="sr-only" aria-live="polite">{{ statusMessage }}</div>
 
+        <!-- Player Section -->
+        <div class="sp-player mb-1">
+          <div class="card bg-transparent border">
+            <div class="card-body py-2">
+              <div class="d-flex align-items-center justify-content-between">
+                <!-- Player name display or edit -->
+                <div class="flex-grow-1 me-2">
+                  <ng-container *ngIf="!editingPlayerName; else editName">
+                    <span class="fw-bold text-primary me-2">👤</span>
+                    <span class="fw-bold">{{ playerName }}</span>
+                  </ng-container>
+                  <ng-template #editName>
+                    <div class="input-group input-group-sm">
+                      <input
+                        type="text"
+                        class="form-control"
+                        [value]="playerName"
+                        #nameInput
+                        (keyup.enter)="
+                          updatePlayerName(nameInput.value);
+                          editingPlayerName = false
+                        "
+                        (blur)="updatePlayerName(nameInput.value)"
+                        autofocus
+                      />
+                      <button
+                        type="button"
+                        class="btn btn-outline-primary btn-sm ms-2"
+                        style="min-width: 80px; height: 32px"
+                        (click)="
+                          updatePlayerName(nameInput.value);
+                          editingPlayerName = false
+                        "
+                        title="Update player name"
+                      >
+                        Update <i class="fas fa-check"></i>
+                      </button>
+                    </div>
+                  </ng-template>
+                </div>
+                <!-- Change button -->
+                <button
+                  *ngIf="!editingPlayerName"
+                  class="btn btn-outline-secondary btn-sm"
+                  (click)="editingPlayerName = true"
+                  title="Change player name"
+                  style="min-width: 80px; height: 32px"
+                >
+                  Change <i class="fas fa-edit"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sp-stats">
+          <div class="div">
+            <span
+              >Moves: <strong>{{ moveCount }}</strong></span
+            >
+          </div>
+          <div class="div">
+            <span
+              >Time:
+              <strong class="mono">{{ formatTime(elapsedMs) }}</strong></span
+            >
+          </div>
+        </div>
+
+        <div class="sp-actions">
+          <!-- Reset: only before game starts (full width when alone) -->
+          <button *ngIf="!hasStarted" (click)="reset()">Shuffle / Reset</button>
+
+          <!-- End: visible only after game starts -->
+          <button
+            *ngIf="hasStarted"
+            (click)="end()"
+            [disabled]="isSolved()"
+            title="End (E)"
+          >
+            End
+          </button>
+
+          <!-- Pause: visible when running -->
+          <button
+            *ngIf="hasStarted && isRunning"
+            (click)="pause()"
+            [disabled]="isSolved()"
+            title="Pause (Space)"
+          >
+            Pause
+          </button>
+
+          <!-- Resume: visible when paused -->
+          <button
+            *ngIf="hasStarted && isPaused()"
+            (click)="resume()"
+            [disabled]="isSolved()"
+            title="Resume (Space)"
+          >
+            Resume
+          </button>
+        </div>
+
+        <div class="sp-size">
+          <select
+            aria-label="Board size"
+            [(ngModel)]="size"
+            (ngModelChange)="setSize($event)"
+            [disabled]="hasStarted"
+          >
+            <option [value]="3">Board - 3×3</option>
+            <option [value]="4">Board - 4×4</option>
+            <option [value]="5">Board - 5×5</option>
+          </select>
+        </div>
+
+        <div class="sp-leaderboard">
+          <div
+            class="sp-leaderboard-card card shadow-sm bg-transparent border-0"
+          >
+            <div class="card-body">
+              <h4 class="card-title text-center mb-3">
+                🏆 {{ playerName }}'s Leaderboard - {{ size }}×{{ size }}
+              </h4>
+
+              <!-- Current Player Record -->
+              <div class="mb-3" *ngIf="getCurrentRecord()">
+                <h6 class="text-center text-primary mb-2">Your Best:</h6>
+                <div
+                  class="record-item d-flex justify-content-between align-items-center p-2 bg-transparent border rounded"
+                >
+                  <div
+                    class="d-flex align-items-center"
+                    *ngIf="getCurrentRecord()?.bestMoves !== null"
+                  >
+                    <span class="record-label fw-bold text-secondary me-2"
+                      >Moves:</span
+                    >
+                    <span
+                      class="record-value d-flex align-items-center"
+                      [class.text-success]="isSolved() && isNewRecord.moves"
+                      [class.fw-bold]="isSolved() && isNewRecord.moves"
+                    >
+                      {{ getCurrentRecord()?.bestMoves }}
+                      <span
+                        *ngIf="isSolved() && isNewRecord.moves"
+                        class="badge bg-success ms-2 animate__animated animate__pulse"
+                        >NEW!</span
+                      >
+                    </span>
+                  </div>
+                  <div
+                    class="d-flex align-items-center"
+                    *ngIf="getCurrentRecord()?.bestTime !== null"
+                  >
+                    <span class="record-label fw-bold text-secondary me-2"
+                      >Time:</span
+                    >
+                    <span
+                      class="record-value d-flex align-items-center"
+                      [class.text-success]="isSolved() && isNewRecord.time"
+                      [class.fw-bold]="isSolved() && isNewRecord.time"
+                    >
+                      {{ formatTime(getCurrentRecord()?.bestTime || 0) }}
+                      <span
+                        *ngIf="isSolved() && isNewRecord.time"
+                        class="badge bg-success ms-2 animate__animated animate__pulse"
+                        >NEW!</span
+                      >
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- All Players Records -->
+              <div *ngIf="getAllRecords().length > 0; else noRecords">
+                <h6 class="text-center mb-2" *ngIf="getAllRecords().length > 1">
+                  All Players:
+                </h6>
+                <div
+                  class="records-list"
+                  style="max-height: 200px; overflow-y: auto"
+                >
+                  <div *ngFor="let record of getAllRecords()" class="mb-2">
+                    <div class="small fw-bold text-muted">
+                      {{ record.playerName }}
+                    </div>
+                    <div
+                      class="d-flex justify-content-between align-items-center p-2 bg-light rounded"
+                    >
+                      <span *ngIf="record.bestMoves !== null" class="small"
+                        >Moves: <strong>{{ record.bestMoves }}</strong></span
+                      >
+                      <span *ngIf="record.bestTime !== null" class="small"
+                        >Time:
+                        <strong>{{ formatTime(record.bestTime) }}</strong></span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <ng-template #noRecords>
+                <div class="text-center py-3">
+                  <p class="no-records text-muted mb-0">
+                    <i class="fas fa-trophy text-warning me-2"></i>
+                    Complete a puzzle to set your first record!
+                  </p>
+                </div>
+              </ng-template>
+
+              <div class="text-center mt-3">
+                <button
+                  class="btn btn-outline-danger btn-sm"
+                  (click)="clearLeaderboard()"
+                  [disabled]="!hasAnyRecords()"
+                  title="Clear all records"
+                >
+                  <i class="fas fa-trash-alt me-1"></i>Clear Records
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
