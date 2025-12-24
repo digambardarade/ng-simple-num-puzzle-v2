@@ -78,67 +78,96 @@
         <div class="sp-player mb-1">
           <div class="card bg-transparent border">
             <div class="card-body py-2">
-              <div class="d-flex align-items-center justify-content-between">
-                <!-- Player name display or edit -->
-                <div class="flex-grow-1 me-2">
-                  <ng-container *ngIf="!editingPlayerName; else editName">
-                    <span class="fw-bold text-primary me-2">👤</span>
-                    <span class="fw-bold">{{ playerName }}</span>
-                  </ng-container>
-                  <ng-template #editName>
-                    <div class="input-group input-group-sm">
-                      <input
-                        type="text"
-                        class="form-control"
-                        [value]="playerName"
-                        #nameInput
-                        (keyup.enter)="
-                          updatePlayerName(nameInput.value);
-                          editingPlayerName = false
-                        "
-                        (blur)="updatePlayerName(nameInput.value)"
-                        autofocus
-                      />
-                      <button
-                        type="button"
-                        class="btn btn-outline-primary btn-sm ms-2"
-                        style="min-width: 80px; height: 32px"
-                        (click)="
-                          updatePlayerName(nameInput.value);
-                          editingPlayerName = false
-                        "
-                        title="Update player name"
-                      >
-                        Update <i class="fas fa-check"></i>
-                      </button>
-                    </div>
-                  </ng-template>
+              <div *ngIf="statusMessage.startsWith('Error:')" class="alert alert-danger py-1 px-2 mb-2" role="alert" style="font-size:0.95em;">
+                {{ statusMessage }}
+              </div>
+              <div *ngIf="!editingPlayerName && !editingCurrentPlayer" class="d-flex align-items-center justify-content-between w-100">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="fw-bold text-primary" style="font-size: 1.3em;">👤</span>
+                  <span class="fw-bold" style="font-size: 1.1em;">{{ playerName }}</span>
                 </div>
-                <!-- Change button -->
-                <button
-                  *ngIf="!editingPlayerName"
-                  class="btn btn-outline-secondary btn-sm"
-                  (click)="editingPlayerName = true"
-                  title="Change player name"
-                  style="min-width: 80px; height: 32px"
+                <div class="d-flex gap-2">
+                  <button
+                    class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center px-2"
+                    (click)="editingCurrentPlayer = true; editingPlayerName = false; addingNewPlayer = false;"
+                    title="Edit current player name"
+                    style="min-width: 80px; height: 2em;"
+                  >
+                    <i class="fas fa-pencil-alt"></i>&nbsp;Edit
+                  </button>
+                  <button
+                    class="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center px-2"
+                    (click)="editingPlayerName = true; editingCurrentPlayer = false; addingNewPlayer = false;"
+                    title="Change player"
+                    style="min-width: 90px; height: 2em;"
+                  >
+                    <i class="fas fa-exchange-alt"></i>&nbsp;Change
+                  </button>
+                </div>
+              </div>
+              <div *ngIf="editingPlayerName" class="input-group input-group-sm mt-2">
+                <select
+                  *ngIf="!addingNewPlayer"
+                  class="form-select"
+                  [ngModel]="playerName"
+                  (ngModelChange)="updatePlayerName($event)"
+                  autofocus
                 >
-                  Change <i class="fas fa-edit"></i>
+                  <option *ngFor="let name of allPlayerNames" [value]="name">{{ name }}</option>
+                  <option [value]="''">+ New Player</option>
+                </select>
+                <ng-container *ngIf="addingNewPlayer">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Enter new player name"
+                    #nameInput
+                    (keyup.enter)="updatePlayerName(nameInput.value)"
+                    (blur)="updatePlayerName(nameInput.value)"
+                    autofocus
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-outline-primary btn-sm ms-2"
+                    style="min-width: 80px; height: 32px"
+                    (click)="updatePlayerName(nameInput.value)"
+                    title="Add player"
+                  >
+                    Add <i class="fas fa-check"></i>
+                  </button>
+                </ng-container>
+              </div>
+              <div *ngIf="editingCurrentPlayer" class="input-group input-group-sm mt-2">
+                <input
+                  type="text"
+                  class="form-control"
+                  [value]="playerName"
+                  #editNameInput
+                  (keyup.enter)="updatePlayerName(editNameInput.value)"
+                  (blur)="updatePlayerName(editNameInput.value)"
+                  autofocus
+                />
+                <button
+                  type="button"
+                  class="btn btn-outline-primary btn-sm ms-2"
+                  style="min-width: 80px; height: 32px"
+                  (click)="updatePlayerName(editNameInput.value)"
+                  title="Update player name"
+                >
+                  Update <i class="fas fa-check"></i>
                 </button>
               </div>
             </div>
           </div>
         </div>
-        <div class="sp-stats">
-          <div class="div">
-            <span
-              >Moves: <strong>{{ moveCount }}</strong></span
-            >
-          </div>
-          <div class="div">
-            <span
-              >Time:
-              <strong class="mono">{{ formatTime(elapsedMs) }}</strong></span
-            >
+        <div class="sp-stats px-5">
+          <div class="d-flex justify-content-between align-items-center gap-3">
+            <span class="px-3 py-1 bg-transparent border rounded-pill fw-semibold shadow-sm">
+              Moves: <strong>{{ moveCount }}</strong>
+            </span>
+            <span class="px-3 py-1 bg-transparent border rounded-pill fw-semibold shadow-sm">
+              Time: <strong class="mono">{{ formatTime(elapsedMs) }}</strong>
+            </span>
           </div>
         </div>
 

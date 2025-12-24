@@ -16,6 +16,21 @@ interface LeaderboardData {
   styleUrls: ['./simple-puzzle.component.scss']
 })
 export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
+    startTimer(): void {
+      this.startTime = Date.now();
+      this.timerId = setInterval(() => {
+        if (this.startTime !== null) {
+          this.elapsedMs = Date.now() - this.startTime;
+        }
+      }, 100);
+    }
+
+    stopTimer(): void {
+      if (this.timerId) {
+        clearInterval(this.timerId);
+        this.timerId = null;
+      }
+    }
   @ViewChild('playAgainBtn') playAgainBtn!: ElementRef<HTMLButtonElement>;
   
   size = 3; // default board size
@@ -30,6 +45,9 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
   leaderboard: LeaderboardData = {};
   isNewRecord = { moves: false, time: false };
   playerName: string = 'Player 1';
+  allPlayerNames: string[] = [];
+  addingNewPlayer: boolean = false;
+  editingCurrentPlayer: boolean = false;
   editingPlayerName: boolean = false;
   ngOnInit(): void {
     // Load last player name if available
@@ -37,6 +55,20 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
     if (storedName) {
       this.playerName = storedName;
     }
+    // Load all player names from localStorage
+    const storedPlayers = localStorage.getItem('puzzle-all-players');
+    if (storedPlayers) {
+      try {
+        this.allPlayerNames = JSON.parse(storedPlayers).sort((a: string, b: string) => a.localeCompare(b));
+      } catch {
+        this.allPlayerNames = [this.playerName];
+      }
+    } else {
+      this.allPlayerNames = [this.playerName];
+    }
+    this.addingNewPlayer = false;
+    this.editingCurrentPlayer = false;
+    this.editingPlayerName = false;
     this.loadLeaderboard();
     this.reset();
   }
@@ -158,22 +190,6 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
     return this.tiles[this.tiles.length - 1] === 0;
   }
 
-  startTimer(): void {
-    this.startTime = Date.now();
-    this.timerId = setInterval(() => {
-      if (this.startTime !== null) {
-        this.elapsedMs = Date.now() - this.startTime;
-      }
-    }, 100);
-  }
-
-  stopTimer(): void {
-    if (this.timerId) {
-      clearInterval(this.timerId);
-      this.timerId = null;
-    }
-  }
-
   get isRunning(): boolean {
     return this.timerId !== null;
   }
@@ -267,9 +283,72 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
 
   updatePlayerName(name: string): void {
     const trimmed = name.trim();
+    if (this.addingNewPlayer) {
+      if (!trimmed) {
+        // Optionally, show a warning or shake input
+        return;
+      }
+      if (this.allPlayerNames.includes(trimmed)) {
+        this.statusMessage = `Error: Player name '${trimmed}' already exists.`;
+        return;
+      }
+      this.playerName = trimmed;
+      this.allPlayerNames.push(this.playerName);
+      this.allPlayerNames.sort((a, b) => a.localeCompare(b));
+      localStorage.setItem('puzzle-player-name', this.playerName);
+      localStorage.setItem('puzzle-all-players', JSON.stringify(this.allPlayerNames));
+      this.statusMessage = `Now playing as ${this.playerName}`;
+      this.saveLeaderboard();
+      this.addingNewPlayer = false;
+      this.editingPlayerName = false;
+      return;
+    }
+    if (this.editingCurrentPlayer) {
+      if (!trimmed) {
+        // Optionally, show a warning or shake input
+        return;
+      }
+      if (trimmed === this.playerName) {
+        // No change, just exit edit mode (allowed)
+        this.editingCurrentPlayer = false;
+        this.editingPlayerName = false;
+        return;
+      }
+      if (this.allPlayerNames.includes(trimmed)) {
+        // Duplicate name, do not allow (unless it's the current name, which is handled above)
+        if (trimmed !== this.playerName) {
+          this.statusMessage = `Error: Player name '${trimmed}' already exists.`;
+          return;
+        }
+      }
+      // Update player name in the list
+      const idx = this.allPlayerNames.indexOf(this.playerName);
+      if (idx !== -1) {
+        this.allPlayerNames[idx] = trimmed;
+        this.allPlayerNames.sort((a, b) => a.localeCompare(b));
+      }
+      this.playerName = trimmed;
+      localStorage.setItem('puzzle-player-name', this.playerName);
+      localStorage.setItem('puzzle-all-players', JSON.stringify(this.allPlayerNames));
+      this.statusMessage = `Player name updated to ${this.playerName}`;
+      this.saveLeaderboard();
+      this.editingCurrentPlayer = false;
+      this.editingPlayerName = false;
+      return;
+    }
+    if (trimmed === '') {
+      this.addingNewPlayer = true;
+      this.playerName = '';
+      return;
+    }
     if (trimmed && trimmed !== this.playerName) {
       this.playerName = trimmed;
       localStorage.setItem('puzzle-player-name', this.playerName);
+      if (!this.allPlayerNames.includes(this.playerName)) {
+        this.allPlayerNames.push(this.playerName);
+        this.allPlayerNames.sort((a, b) => a.localeCompare(b));
+        localStorage.setItem('puzzle-all-players', JSON.stringify(this.allPlayerNames));
+      }
       this.statusMessage = `Now playing as ${this.playerName}`;
       this.saveLeaderboard();
     }
