@@ -307,6 +307,13 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
       localStorage.setItem('puzzle-player-name', this.playerName);
       localStorage.setItem('puzzle-all-players', JSON.stringify(this.allPlayerNames));
       this.statusMessage = `Now playing as ${this.playerName}`;
+      this.ngZone.runOutsideAngular(() => {
+        setTimeout(() => {
+          this.ngZone.run(() => {
+            this.statusMessage = '';
+          });
+        }, 2500);
+      });
       this.saveLeaderboard();
       this.addingNewPlayer = false;
       this.editingPlayerName = false;
@@ -347,6 +354,13 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
       localStorage.setItem('puzzle-player-name', this.playerName);
       localStorage.setItem('puzzle-all-players', JSON.stringify(this.allPlayerNames));
       this.statusMessage = `Player name updated to ${this.playerName}`;
+      this.ngZone.runOutsideAngular(() => {
+        setTimeout(() => {
+          this.ngZone.run(() => {
+            this.statusMessage = '';
+          });
+        }, 2500);
+      });
       this.saveLeaderboard();
       this.editingCurrentPlayer = false;
       this.editingPlayerName = false;
@@ -366,6 +380,13 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
         localStorage.setItem('puzzle-all-players', JSON.stringify(this.allPlayerNames));
       }
       this.statusMessage = `Now playing as ${this.playerName}`;
+      this.ngZone.runOutsideAngular(() => {
+        setTimeout(() => {
+          this.ngZone.run(() => {
+            this.statusMessage = '';
+          });
+        }, 2500);
+      });
       this.saveLeaderboard();
     }
     this.editingPlayerName = false;
