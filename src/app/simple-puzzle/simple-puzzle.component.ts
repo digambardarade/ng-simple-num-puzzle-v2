@@ -43,6 +43,15 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
     // Pause should only stop an active timer; never start it
     if (this.timerId) {
       this.stopTimer();
+      this.statusMessage = 'Game paused';
+    }
+  }
+
+  resume(): void {
+    // Only resume if a game has started previously and not solved
+    if (this.hasStarted && this.startTime !== null && !this.isSolved()) {
+      this.resumeTimer();
+      this.statusMessage = 'Game resumed';
     }
   }
 
@@ -159,43 +168,10 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
     }, 100);
   }
 
-  togglePause(): void {
-    if (this.isRunning) {
-      this.stopTimer();
-      return;
-    }
-    // Only resume if a game has started previously and not solved
-    if (this.startTime !== null && !this.isSolved()) {
-      this.resumeTimer();
-    }
-  }
-
-  get pauseLabel(): string {
-    if (this.isRunning) return 'Pause';
-    return this.startTime !== null ? 'Resume' : 'Pause';
-  }
-
   end(): void {
     // End should reset to a fresh game: zero moves, zero timer, new shuffle
     this.reset();
     this.statusMessage = 'Game ended. New game ready';
-  }
-
-  toggleStartPauseResume(): void {
-    // Remove start behavior: only Pause/Resume
-    if (this.isRunning) {
-      this.stopTimer();
-      this.statusMessage = 'Game paused';
-      return;
-    }
-    if (this.hasStarted && this.startTime !== null && !this.isSolved()) {
-      this.resumeTimer();
-      this.statusMessage = 'Game resumed';
-    }
-  }
-
-  get pauseResumeLabel(): string {
-    return this.isRunning ? 'Pause' : 'Resume';
   }
 
   isPaused(): boolean {
@@ -263,7 +239,11 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
     if (isSpace) {
       if (this.hasStarted) {
         event.preventDefault();
-        this.toggleStartPauseResume();
+        if (this.isRunning) {
+          this.pause();
+        } else if (this.isPaused()) {
+          this.resume();
+        }
       }
       return;
     }
@@ -272,7 +252,7 @@ export class SimplePuzzleComponent implements OnInit, AfterViewChecked {
       // Resume if paused
       if (this.isPaused()) {
         event.preventDefault();
-        this.toggleStartPauseResume();
+        this.resume();
       }
       return;
     }

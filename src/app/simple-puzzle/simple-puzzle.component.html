@@ -31,7 +31,7 @@
       <div class="sp-overlay-card" role="dialog" aria-modal="true" aria-label="Game paused">
         <h3>⏸️ Game Paused</h3>
         <p>Resume to continue playing.</p>
-        <button class="breathing resume-btn" (click)="toggleStartPauseResume()" autofocus title="Resume (Space)">Resume</button>
+        <button class="breathing resume-btn" (click)="resume()" autofocus title="Resume (Space)">Resume</button>
       </div>
     </div>
   </div>
@@ -59,10 +59,10 @@
       <button *ngIf="hasStarted" (click)="end()" [disabled]="isSolved()" title="End (E)">End</button>
 
       <!-- Pause: visible when running -->
-      <button *ngIf="hasStarted && isRunning" (click)="toggleStartPauseResume()" [disabled]="isSolved()" title="Pause (Space)">Pause</button>
+      <button *ngIf="hasStarted && isRunning" (click)="pause()" [disabled]="isSolved()" title="Pause (Space)">Pause</button>
 
       <!-- Resume: visible when paused -->
-      <button *ngIf="hasStarted && isPaused()" (click)="toggleStartPauseResume()" [disabled]="isSolved()" title="Resume (Space)">Resume</button>
+      <button *ngIf="hasStarted && isPaused()" (click)="resume()" [disabled]="isSolved()" title="Resume (Space)">Resume</button>
     </div>
 
     <div class="sp-size">
@@ -77,5 +77,6 @@
         <option [value]="5">Board - 5×5</option>
       </select>
     </div>
+    
   </div>
 </div>
